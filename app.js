@@ -1,16 +1,23 @@
 const express = require('express');
-const helmet = require('helmet');
-const { ErrorResponseObject } = require('./common/http');
-const routes = require('./routes');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
+app.use(bodyParser.json());
+app.use(cors());
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(helmet());
-app.use('/', routes);
+let iframeUrl = '';
 
-// default catch all handler
-app.all('*', (req, res) => res.status(404).json(new ErrorResponseObject('route not defined')));
+app.post('/update-url', (req, res) => {
+    iframeUrl = req.body.url;
+    res.json({ status: 'URL updated' });
+});
 
-module.exports = app;
+app.get('/current-url', (req, res) => {
+    res.json({ url: iframeUrl });
+});
+
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
